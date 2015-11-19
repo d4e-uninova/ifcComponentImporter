@@ -95,7 +95,6 @@ public class IFCComponentImporter : IExternalCommand
             {
                 filePath = openFileDialog1.FileName;
             }
-            Result result;
             var ifcops = new IFCImportOptions();
             Document document = commandData.Application.Application.OpenIFCDocument(filePath, ifcops);
 
