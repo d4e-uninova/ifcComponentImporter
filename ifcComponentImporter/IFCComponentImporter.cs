@@ -100,7 +100,6 @@ public class IFCComponentImporter : IExternalCommand
             Document document = commandData.Application.Application.OpenIFCDocument(filePath, ifcops);
 
             DocumentPreviewSettings settings = document.GetDocumentPreviewSettings();
-
             FilteredElementCollector collector = new FilteredElementCollector(document);
             collector.OfClass(typeof(ViewPlan));
             FilteredElementCollector uicollector = new FilteredElementCollector(commandData.Application.ActiveUIDocument.Document);
