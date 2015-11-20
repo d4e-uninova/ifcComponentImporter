@@ -1,0 +1,14 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<RevitAddIns>
+  <AddIn Type="Command">
+    <Name>D4E IFC Component Importer by Uninova</Name>
+    <Text>D4E IFC Component Importer by Uninova</Text>
+    <FullClassName>IFCComponentImporter</FullClassName>
+    <Assembly>ifcComponentImporter.dll</Assembly>
+    <AddInId>15523d90-1b67-48b4-83f5-cbf755ab32fa</AddInId>
+    <VendorId>Uninova</VendorId>
+    <VendorDescription>Uninova</VendorDescription>
+	
+	
+  </AddIn>
+</RevitAddIns>

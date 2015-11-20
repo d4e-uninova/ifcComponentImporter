@@ -76,6 +76,7 @@ public class IFCComponentImporter : IExternalCommand
         }
         return result;
     }
+
     public Autodesk.Revit.UI.Result Execute(ExternalCommandData commandData, ref string message, ElementSet elements)
     {
         try
@@ -93,41 +94,42 @@ public class IFCComponentImporter : IExternalCommand
             if (openFileDialog1.ShowDialog() == DialogResult.OK)
             {
                 filePath = openFileDialog1.FileName;
-            }
-            var ifcops = new IFCImportOptions();
-            Document document = commandData.Application.Application.OpenIFCDocument(filePath, ifcops);
 
-            DocumentPreviewSettings settings = document.GetDocumentPreviewSettings();
-            FilteredElementCollector collector = new FilteredElementCollector(document);
-            collector.OfClass(typeof(ViewPlan));
-            FilteredElementCollector uicollector = new FilteredElementCollector(commandData.Application.ActiveUIDocument.Document);
-            uicollector.OfClass(typeof(ViewPlan));
-            Func<ViewPlan, bool> isValidForPreview = v => settings.IsViewIdValidForPreview(v.Id);
+                var ifcops = new IFCImportOptions();
+                Document document = commandData.Application.Application.OpenIFCDocument(filePath, ifcops);
 
-            ViewPlan viewForPreview = collector.OfType<ViewPlan>().First<ViewPlan>(isValidForPreview);
-            using (Transaction tx = new Transaction(document))
-            {
-                tx.Start("tr");
-                viewForPreview.SetWorksetVisibility(viewForPreview.WorksetId, WorksetVisibility.Visible);
-                tx.Commit();
-            }
-            SaveAsOptions options = new SaveAsOptions();
-            options.PreviewViewId = viewForPreview.Id;
+                DocumentPreviewSettings settings = document.GetDocumentPreviewSettings();
+                FilteredElementCollector collector = new FilteredElementCollector(document);
+                collector.OfClass(typeof(ViewPlan));
+                FilteredElementCollector uicollector = new FilteredElementCollector(commandData.Application.ActiveUIDocument.Document);
+                uicollector.OfClass(typeof(ViewPlan));
+                Func<ViewPlan, bool> isValidForPreview = v => settings.IsViewIdValidForPreview(v.Id);
 
-            rvtPath = tmpPath +@"\"+ Path.ChangeExtension(Path.GetFileName(filePath), "rvt");
-         
-            if (File.Exists(rvtPath))
-            {
-                File.Delete(rvtPath);
-            }
-            document.SaveAs(rvtPath, options);
+                ViewPlan viewForPreview = collector.OfType<ViewPlan>().First<ViewPlan>(isValidForPreview);
+                using (Transaction tx = new Transaction(document))
+                {
+                    tx.Start("tr");
+                    viewForPreview.SetWorksetVisibility(viewForPreview.WorksetId, WorksetVisibility.Visible);
+                    tx.Commit();
+                }
+                SaveAsOptions options = new SaveAsOptions();
+                options.PreviewViewId = viewForPreview.Id;
 
-            Process process = new Process();
-            process.StartInfo.FileName="PostAction.exe";
-            process.StartInfo.Arguments = rvtPath;
-            process.Start();
+                rvtPath = tmpPath + @"\" + Path.ChangeExtension(Path.GetFileName(filePath), "rvt");
 
-               
+                if (File.Exists(rvtPath))
+                {
+                    File.Delete(rvtPath);
+                }
+                document.SaveAs(rvtPath, options);
+                commandData.Application.PostCommand(RevitCommandId.LookupCommandId("ID_LOAD_GROUP"));
+
+                Process process = new Process();
+                process.StartInfo.FileName = "PostAction.exe";
+                process.StartInfo.Arguments = "\""+rvtPath+"\"";
+                process.Start();
+
+            } 
             return 0;
         }
         catch (Exception ex)

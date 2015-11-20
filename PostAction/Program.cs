@@ -20,8 +20,6 @@ namespace PostAction
         [DllImport("user32.dll")]
         public static extern IntPtr PostMessage(IntPtr hWnd, uint msg, uint wParam, uint lParam);
 
-        [DllImport("user32.dll")]
-        static extern bool SetForegroundWindow(IntPtr hWnd);
 
         [DllImport("USER32.DLL")]
         static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
@@ -78,26 +76,7 @@ namespace PostAction
                 DateTime time;
                 int delta;
                 IntPtr strPtr;
-                IntPtr hWnd = GetChildWindows(processes[0].MainWindowHandle)[71];
-                SetForegroundWindow(hWnd);
-                Thread.Sleep(10);
-                PostMessage(hWnd, 0x104, 0x12, 0x20380001);
-                Thread.Sleep(10);
-                PostMessage(hWnd, 0x105, 0x12, 0xC0380001);
-                Thread.Sleep(100);
-                PostMessage(hWnd, 0x100, 0x49, 0x170001);
-                Thread.Sleep(10);
-                PostMessage(hWnd, 0x101, 0x49, 0xC0170001);
-                Thread.Sleep(10);
-                PostMessage(hWnd, 0x100, 0x4C, 0x260001);
-                Thread.Sleep(10);
-                PostMessage(hWnd, 0x101, 0x4C, 0xC0260001);
-                Thread.Sleep(10);
-                PostMessage(hWnd, 0x100, 0x47, 0x220001);
-                Thread.Sleep(10);
-                PostMessage(hWnd, 0x101, 0x47, 0xC0220001);
-                Thread.Sleep(10);
-                hWnd = IntPtr.Zero;
+                IntPtr hWnd = IntPtr.Zero;
                 time = DateTime.Now;
                 do
                 {
@@ -111,13 +90,27 @@ namespace PostAction
                 } while (hWnd == IntPtr.Zero);
                 if (delta <= timeOut)
                 {
-                    Thread.Sleep(1000);
-                    strPtr = Marshal.StringToCoTaskMemAuto(args[0]);
-                    SendMessage(GetChildWindows(hWnd)[1], 0X000C, 0, (uint)strPtr);
-
-                    PostMessage(GetChildWindows(hWnd)[5], 0x100, 0xD, 0x1C0001);
-                    Thread.Sleep(10);
-                    PostMessage(GetChildWindows(hWnd)[5], 0x101, 0xD, 0xC01C0001);
+                    time = DateTime.Now;
+                    do
+                    {
+                        Thread.Sleep(1);
+                        hWnd = FindWindow(null, "Load File as Group");
+                        delta = (DateTime.Now - time).Seconds;
+                        if (delta > timeOut || hWnd==IntPtr.Zero)
+                        {
+                            break;
+                        }
+                        try
+                        {
+                            strPtr = Marshal.StringToCoTaskMemAuto(args[0]);
+                            SendMessage(GetChildWindows(hWnd)[1], 0X000C, 0, (uint)strPtr);
+                            PostMessage(GetChildWindows(hWnd)[5], 0x100, 0xD, 0x1C0001);
+                            PostMessage(GetChildWindows(hWnd)[5], 0x101, 0xD, 0xC01C0001);
+                        }
+                        catch(Exception ex)
+                        {
+                        }
+                    } while (hWnd != IntPtr.Zero );
                 }
             }
         }
